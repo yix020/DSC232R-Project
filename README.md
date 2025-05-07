@@ -7,7 +7,7 @@ This project focuses on preparing and analyzing the [Traffic Road Object Detecti
 The dataset was explored in terms of:
 
 - Total image and annotation counts across `train`, `valid`, and `test` splits
-- Object class distribution using bar plots
+- Object class distribution using bar plots and percentages
 - Sample bounding box visualizations with class labels
 - Image width and height distribution to assess input variability
 - Missing image/label detection and cleanup of orphaned files
@@ -18,18 +18,25 @@ See the full notebook here: [`setupAndEDA.ipynb`](./setupAndEDA.ipynb)
 
 To prepare the dataset for training, we performed the following preprocessing steps:
 
-- **Image Resizing with Padding**: All images were resized to `640×640` using a custom `resize_with_padding()` function, which preserves the original aspect ratio and pads with black borders. This ensures consistent input dimensions without distorting object shapes — a crucial factor for object detection.
-- **Pixel Normalization**: Each image was normalized to the `[0, 1]` range by dividing all pixel values by 255.
-- **Missing Label/Image Cleanup**: We identified and removed over 7,000 orphaned label files that had no matching image, ensuring training stability and data integrity.
+- **Image Resizing**: All images were resized to `252×252` resolution for uniformity across training.
+- **Pixel Normalization**: Each image is grayscale and normalized with mean=0.5, std=0.5.
+- **Missing Label/Image Cleanup**: We identified and removed 6,940 orphaned label files with no matching image to ensure dataset consistency.
+- **Class Distribution**: A detailed bar chart was created to visualize class imbalance. Classes like `car` and `pedestrian` dominate the dataset.
+- **Class Weights Calculation**: Based on class frequencies, inverse-proportional weights were computed for use in the loss function to counteract imbalance.
+- **Data Augmentation**: Applied on-the-fly using PyTorch `transforms`, including:
+  - Horizontal flips
+  - Random brightness/contrast adjustments
+  - Small rotations
+- Augmented images are generated during training and not saved to disk.
 
 ## Repository Contents
 
-- `setupAndEDA.ipynb`: Jupyter Notebook containing the full exploration and preprocessing workflow
-- `resize_with_padding()`: Python function used for aspect-ratio preserving image resizing
-- All original images and labels remain in YOLO format under the respective split folders
+- `setupAndEDA.ipynb`: Jupyter Notebook with full data exploration and preprocessing
+- `README.md`: This file, documenting the preprocessing and next steps
+- `images/` and `labels/` folders under `train/`, `valid/`, and `test/`
 
 ## Next Steps
 
-With data cleaned and standardized, the next phase involves defining a YOLO-compatible dataset config and launching training with a model like YOLOv5 or YOLOv8.
-
-
+- Train a custom object detection model using the cleaned and augmented data
+- Optionally integrate a custom PyTorch `Dataset` class to support YOLO label format
+- Evaluate per-class performance and refine augmentation strategy if needed
