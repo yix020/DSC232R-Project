@@ -35,6 +35,39 @@ To prepare the dataset for training, we performed the following preprocessing st
 - `README.md`: This file, documenting the preprocessing and next steps
 - `images/` and `labels/` folders under `train/`, `valid/`, and `test/`
 
+## Environment Setup & SLURM Configuration
+This project was developed using a custom Python environment created locally for data exploration and preprocessing.
+
+Environment Details:
+Python Version: 3.10
+
+Environment Manager: conda 
+
+Main Libraries Used:
+
+pandas
+
+numpy
+
+matplotlib
+
+opencv-python (for cv2)
+
+tqdm
+
+os, glob, shutil (Python standard library)
+
+To recreate this environment, run:
+
+conda create -n tf_env python=3.10
+conda activate tf_env
+pip install pandas numpy matplotlib opencv-python tqdm
+pip install torch==2.2.2 torchvision==0.17.2
+
+## SLURM Job Configuration
+
+SLURM was not used for preprocessing in this notebook. All data preparation was run locally.
+
 ## Next Steps
 
 - Train a custom object detection model using the cleaned and augmented data
