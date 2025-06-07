@@ -1,4 +1,3 @@
-
 ## Polish Road Object Detection – Model Training and Evaluation
 This project applies deep learning techniques to the Traffic Road Object Detection Polish 12k dataset. We explore multiple architectures and optimization strategies to classify road scenes effectively. Our final model uses EfficientNetB0, a compact yet powerful convolutional neural network.
 
