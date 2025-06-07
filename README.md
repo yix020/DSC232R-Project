@@ -1,66 +1,140 @@
+## Polish Road Object Detection – Model Training and Evaluation
+This project applies deep learning techniques to the Traffic Road Object Detection Polish 12k dataset. We explore multiple architectures and optimization strategies to classify road scenes effectively. Our final model uses EfficientNetB0, a compact yet powerful convolutional neural network.
 
-# Polish Road Object Detection – Model Training and Evaluation
+## Introduction
 
-This project applies deep learning techniques to the [Traffic Road Object Detection Polish 12k dataset](https://www.kaggle.com/datasets/mikoajkoek/traffic-road-object-detection-polish-12k). It includes preprocessing, model development, and evaluation across training, validation, and test sets.
+Road object detection is critical for applications such as autonomous driving, traffic surveillance, and smart city infrastructure. Building a robust model that can generalize well across varied real-world driving conditions is a non-trivial challenge, especially with imbalanced and noisy data. We selected this dataset because it provides a practical and diverse set of annotated road scenes from Poland.
 
-## Data Preprocessing
+Having an accurate classifier for road objects can enhance safety and efficiency in transportation systems. Our project explores baseline CNNs, transfer learning with ResNet18, and finally adopts EfficientNetB0 as the optimal trade-off between performance and efficiency.
 
-Key preprocessing steps included:
+## Submissions
 
-- **Image Resizing** to 128×128 resolution
-- **Pixel Normalization** to [-1, 1] using mean=0.5, std=0.5 for each RGB channel
-- **Class Distribution Analysis** with bar plots to identify imbalance
-- **Class Weight Computation** for weighted loss in training
-- **Label Validation** script to check format issues, orphaned/missing files, and class range
-- **Train/Val/Test Split** following the provided YOLO directory structure
+- setupAndEDA.ipynb: Initial dataset loading, exploratory plots, class imbalance visualization
 
-All image-label pairs were confirmed to be valid and in the correct format. No files were removed.
+- Milestone 3.ipynb: Custom CNN + ResNet18 implementation, training, and evaluation
 
-## Models Trained
+- EfficientNetB0 model.ipynb: Final model (EfficientNetB0) training and evaluation
 
-Two classification models were implemented:
+All code is available as Jupyter notebooks and structured for reproducibility.
 
-### 1. Simple CNN
+## Figures
+![](images/efficientnet_confusion_matrix.png)
 
-- Custom 3-layer CNN built from scratch using PyTorch
-- Underperformed with ~2.45% validation accuracy
-- Showed signs of **underfitting**
+## Methods
 
-### 2. Pretrained ResNet18
+### Data Exploration
 
-- Fine-tuned using ImageNet weights
-- Achieved **training accuracy of 98.50%** and **test accuracy of 50.60%**
-- Outperformed the custom CNN, but showed signs of **overfitting**
+Visualized sample images
 
-All experiments are documented in:  
-📓 [`Milestone 3.ipynb`](./Milestone%203.ipynb)
+Counted class frequencies → found heavy imbalance toward class 0
 
-## Evaluation Results
+Verified annotation structure and YOLO format consistency
 
-| Metric           | Value    |
-|------------------|----------|
-| Train Accuracy   | 98.50%   |
-| Train Error      | 1.50%    |
-| Validation Accuracy | ~52%  |
-| Test Accuracy    | 50.60%   |
-| Test Error       | 49.40%   |
+### Preprocessing
+
+All images resized to 128×128
+
+Normalized pixel values to [-1, 1] using mean=0.5, std=0.5
+
+Computed class weights to handle imbalance
+
+Confirmed image-label pairing integrity
+
+### Model 1: Simple CNN
+
+#### 3-layer ConvNet (baseline)
+ Conv2d → ReLU → MaxPool → Flatten → FC → Softmax
+
+- Accuracy: ~18%
+
+- Underfitting and low generalization
 
 
-## Where the Model Fits on the Fitting Graph
+### Model 2: ResNet18 (Pretrained)
 
-Our model fits in the overfitting region of the fitting graph. The training error is extremely low (1.5%), while the test error is relatively high (49.40%), indicating the model performs very well on the training data but struggles to generalize to unseen data. This gap between train and test performance suggests the model has overfit to the training set.
+#### PyTorch torchvision.models.resnet18
+Fine-tuned with ImageNet weights
 
-## What are the next models you are thinking of and why?
+- Accuracy: 99.15% (train), 50.6% (test)
 
-Given that the current model (ResNet18) shows signs of overfitting, the next models I’m considering include deeper or more regularized architectures, such as ResNet34 or EfficientNet-B0. These models may capture richer features while incorporating improved regularization. Additionally, I’m considering applying dropout layers, data augmentation, or using early stopping to reduce overfitting. Exploring transfer learning with fine-tuning more layers could also help adapt pretrained models more effectively to this dataset.
+- Suffered from overfitting
+
+### Model 3: EfficientNetB0 (Final)
+
+#### torchvision.models.efficientnet_b0
+Pretrained = True, classifier head replaced
+Optimized using Adam, LR scheduler, early stopping
+
+- Integrated early stopping
+
+- Applied learning rate scheduling on validation loss
+
+
+## Results
+
+### ResNet18:
+
+Train Accuracy: 99.15%
+
+Validation Accuracy: ~52%
+
+Test Accuracy: 50.6%
+
+### EfficientNetB0:
+
+Train Accuracy: 96.2%
+
+Test Accuracy: 13.9%
+
+Macro Avg F1-score: 0.106
+
+Confusion Matrix: Shows prediction bias toward dominant classes
+
+### Observations:
+
+- ResNet18 overfits
+
+- EfficientNetB0 generalizes slightly better with early stopping but suffers from class imbalance
+
+
+## Discussion
+
+- The ResNet18 model had strong capacity but lacked regularization, leading to poor test generalization.
+
+- EfficientNetB0 improved training stability and computational efficiency, but still struggled on rare classes due to dataset imbalance.
+
+### Possible reasons for low performance:
+
+- Severe class imbalance
+
+- Limited data diversity
+
+- Missing/misaligned label files
+
+### Improvements considered:
+
+- Apply SMOTE or oversampling
+
+- Use label smoothing or focal loss
+
+- Increase input resolution (e.g., 224x224 for EfficientNet)
+
+- Augment training data more aggressively
 
 ## Conclusion
+This project explored several deep learning architectures, with EfficientNetB0 serving as our final model. While it showed some promise, performance was limited by label quality and data imbalance. In future iterations, we would:
 
-Two models were tested: a custom-built Simple CNN and a pretrained ResNet18. The Simple CNN showed signs of underfitting, with low training performance and validation accuracy stuck around 2.45%, indicating that the model lacked the capacity to learn meaningful features. The pretrained ResNet18 performed significantly better, achieving a low training error (1.5%) and a higher validation accuracy (~51%), but still showed signs of overfitting, with a high test error (49.40%). To improve generalization, future steps could include applying data augmentation, dropout, or early stopping, as well as exploring deeper architectures like ResNet34 or more efficient models such as EfficientNet-B0. These adjustments may help balance model capacity and regularization to reduce overfitting while maintaining strong performance.
+- Focus on data quality assurance (removing broken labels)
 
-## Repository Structure
+- Integrate focal loss and advanced augmentation
 
-- `Milestone 3.ipynb`: Final training, evaluation, and model comparison (CNN and ResNet)
-- `setupAndEDA.ipynb`: Initial dataset exploration, class distribution, and validation
-- `Road_Detection_Data/`: Clean YOLO-format image/label dataset
+- Test semi-supervised learning or self-training with unlabeled data
 
+## Collaboration
+Name: Yingshan Xie
+
+Title: Project Lead
+
+Contribution: Data Preprocessing, CNN & EfficientNetB0 Implementation, Results Analysis, README Write-up
+
+- This was a solo project. All tasks, from initial setup to final report, were completed individually.
